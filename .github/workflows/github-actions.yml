@@ -9,7 +9,7 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: rough_draft.tex
+          root_file: main.tex
       - name: Upload PDF file
         uses: actions/upload-artifact@v4
         with:
