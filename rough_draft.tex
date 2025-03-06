@@ -1,0 +1,300 @@
+\documentclass[11pt]{article}
+
+%PDF MetaData
+\usepackage[pdftex,
+	pdfauthor={Matthew Clark},
+	pdftitle={Cost-Effective On-Premises AI Solution Using CoT Distilled LLMs},
+	pdfsubject={Artificial Intelligence},
+	pdfkeywords={CoT Distillation;On-Premises AI;RAG Systems;Mobile Applications;TTS},
+	pdfproducer={pdfTeX-1.40.18},
+	pdfcreator={LaTeX with hyperref package}]{hyperref}
+
+%Packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{subfig}
+\usepackage{tikz}
+\usepackage{caption}
+\usepackage{setspace}
+\usepackage{enumitem}
+\usepackage{siunitx} % Required for alignment
+\usepackage{multirow} % Required for multirows
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{multicol}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{perpage} %the perpage package
+\MakePerPage{footnote} %the perpage package command
+\usepackage[numbers]{natbib}
+
+%Subtitle
+\usepackage{titling}
+\newcommand{\subtitle}[1]{
+	\postauthor{
+	\end{tabular}
+		\par\end{center}
+		\begin{center}
+		\textit{\small#1}
+		\end{center}
+		\vskip0.5em
+	}
+}
+
+%Math Packages
+\usepackage{pgfplots}
+%Math Commands
+\newcommand{\eqname}[1]{\tag*{#1}}% Tag equation with name
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}%one equ label in align
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\makeatletter
+\renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
+	\hskip -\arraycolsep
+	\let\@ifnextchar\new@ifnextchar
+	\array{#1}}
+\makeatother
+\renewcommand*{\arraystretch}{0.8}
+\makeatletter
+\g@addto@macro\normalsize{%
+	\setlength\abovedisplayskip{4pt}
+	\setlength\belowdisplayskip{4pt}
+	\setlength\abovedisplayshortskip{0pt}
+	\setlength\belowdisplayshortskip{0pt}
+}
+\makeatother
+\usepackage{mathtools}
+\usepackage{chngcntr}
+\counterwithin{equation}{section}
+
+%Changes the Abstract title
+\usepackage{abstract}
+
+%Table Formatting
+\sisetup{
+round-mode          = places, % Rounds numbers
+round-precision     = 2, % to 2 places
+}
+
+\usepackage{geometry}
+\geometry{
+a4paper,
+total={216mm,279mm},
+left=25.4mm,
+right=25.4mm,
+top=25.4mm,
+bottom=25.4mm
+}
+
+%table of contents and paragraphs
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+\let\orisectionmark\sectionmark
+\renewcommand\sectionmark[1]{\label{sec:#1}\orisectionmark{#1}}
+\let\orisubsectionmark\subsectionmark
+\renewcommand\subsectionmark[1]{\label{subsec:#1}\orisubsectionmark{#1}}
+\let\orisubsubsectionmark\subsubsectionmark
+\renewcommand\subsubsectionmark[1]{\label{subsubsec:#1}\orisubsubsectionmark{#1}}
+\newcommand\simpleparagraph[1]{%
+	\stepcounter{paragraph}\paragraph*{\theparagraph\quad{}#1}}
+\makeatletter
+\renewcommand\thesubsubsection{}
+\renewcommand\theparagraph{}
+\makeatother
+
+%horizontal line spacing
+\usepackage{setspace}
+\renewcommand{\baselinestretch}{1.0}
+
+\begin{document}
+		
+%TitlePage
+\title{\textbf{Cost-Effective On-Premises AI Solution Using CoT Distilled LLMs}}
+\author{\textbf{Matthew Clark}}
+\subtitle{Computer Science Department\\
+	The Masters University\\
+	Santa Clarita, CA., United States\\
+	mhckqw@gmail.com}
+\date{\small \today}
+\maketitle
+\vspace{1mm}
+
+\begin{abstract}
+This paper introduces a cost-effective, on-premises Artificial Intelligence (AI) solution that leverages Chain of Thought (CoT) Distilled Large Language Models (LLMs) to address the legal, security, and cost-related challenges associated with vendor-provided AI services. The proposed system includes two practical implementations: an iOS application for mobile access and a Linux-based Python script with Text-to-Speech (TTS) functionality for auditory output. Both applications utilize Disneyland Parks help documentation as a domain-specific knowledge base, demonstrating the system's potential in customer service and information retrieval contexts. The implementation encompasses on-premises infrastructure setup, integration of a Retrieval Augmented Generation (RAG) system, and detailed development of the user interfaces. Evaluation methods are proposed to assess performance across multiple dimensions, and future research directions are outlined to enhance the system's capabilities.
+\end{abstract}
+\pagenumbering{gobble}	
+\newpage
+
+\pagenumbering{gobble}
+\pagenumbering{arabic}
+\newpage
+\pagenumbering{gobble}
+\tableofcontents
+
+\newpage
+\pagenumbering{arabic}
+\doublespacing
+
+
+\section{Introduction}
+The field of Artificial Intelligence (AI) has cultivated remarkable advancements, transforming industries from automation, to decision-making, and personalized services. AI as a Service (AIaaS) platforms, such as those offered by Amazon Web Services (AWS), Google Cloud, and Microsoft Azure, have democratized access to advanced AI capabilities, allowing organizations to integrate machine learning models, natural language processing (NLP), and computer vision into their workflows without building these systems from scratch. Despite their accessibility and scalability, these cloud-based solutions are not a silver bullet solution and present some drawbacks, particularly for small to medium-sized setups and organizations handling sensitive data.
+
+One major concern with AIaaS is data privacy and security. When organizations rely on third-party vendors, they must upload their data to external servers, relinquishing control of how that data is stored, processed, and protected. High-profile data breaches and increasing regulation such as the General Data Protection Regulation (GDPR) in Europe and the California Consumer Privacy Act (CCPA) in the United States have heightened awareness of these risks. For example, a 2022 report by IBM estimated that the average cost of a data breach was around \$4.35 million \cite{ibm2022data}, showcasing the financial and reputational risks. For certain applications, such as sensitive HR tools, the business' risk tolerance is too low. Additionally, industries like healthcare, finance, and government, which deal with confidential information, face strict compliance requirements that may prohibit the use of cloud-based AI due to potential legal liabilities.
+
+Another challenge is cost. While AIaaS offers a pay-as-you-go model that appears economical, expenses can rack up quickly as usage scales. For example, processing thousands of queries per day or training custom models on vendor platforms can incur significant costs, making it unsustainable for small setups with limited budgets.
+
+In response to these challenges, on-premises AI solutions are a compelling alternative. By deploying AI models locally or on the edge, organizations retain full ownership of their data and ensure compliance with legal standards. However, traditional on-prem deployments often demand powerful hardware (e.g., high-end GPUs or TPUs) and specialized technical support personnel, posing barriers to adoption.
+
+This paper proposes a cost-effective, on-prem AI solution that overcomes these hurdles by utilizing Chain of Thought (CoT) Distilled Large Language Models (LLMs). CoT Distillation is a technique that transfers the reasoning abilities of large, resource-intensive LLMs to smaller, more efficient models, enabling high performance on modest hardware. My solution integrates this approach with a Retrieval Augmented Generation (RAG) system to enhance response accuracy using external knowledge sources, specifically Disneyland Parks help docs. I demonstrate its practicality through two applications: an iOS app for mobile users and a Python script with TTS. Both applications are aimed at providing information about the Parks.
+
+The objectives of this project are threefold:
+\begin{enumerate}
+    \item To develop an on-premises AI system that balances performance with resource efficiency.
+    \item To address legal and security concerns by keeping data local.
+    \item To example real-world applications in a customer-facing context.
+\end{enumerate}
+
+The paper is organized as follows: Section \ref{sec:related_work} reviews related work, Section \ref{sec:implementation} details the implementation, Section \ref{sec:evaluation} outlines the evaluation strategy, and Section \ref{sec:conclusions} concludes with future directions.
+
+\section{Related Work}
+\label{sec:related_work}
+This section surveys existing research and technologies relevant to my solution, categorized into four areas: CoT Distillation, on-premises AI, RAG systems, and mobile/TTS applications.
+
+\subsection{Chain of Thought Distillation}
+Chain of Thought (CoT) Distillation enhances the efficiency of LLMs by training smaller models to mimic the step-by-step reasoning processes of their larger counterparts. According to Wei et al. \cite{distilling_step_by_step}, this method allows a distilled model with fewer parameters to outperform a larger model on reasoning tasks, using significantly less training data. For example, their experiments showed that a 1.5B-parameter model distilled with CoT outperformed a 6B-parameter baseline, making it ideal for resource-constrained environments like on-premises setups.
+
+Similarly, Smith et al. \cite{embodied_cot_distillation} explore applying distilled models to physical agents, such as robots or edge devices. Their findings suggest that CoT-distilled LLMs can generalize reasoning across diverse tasks, a property I leverage for my Disneyland Parks application.
+
+\subsection{On-Premises AI Solutions}
+Deploying AI locally has been studied as a means to mitigate cloud-related risks. Johnson \cite{on_premise_ai} highlights advantages like data sovereignty, reduced latency, and long-term cost savings. However, the paper notes challenges such as high initial hardware costs and the need for in-house expertise—issues my solution addresses by using distilled models that run on standard GPUs.
+
+The technical report on DeepSeek-V3 \cite{deepseek_v3_tech} describes a distilled LLM optimized for on-premises use, achieving near state-of-the-art performance with a 32B-parameter model that fits within 24GB of GPU memory, aligning with my hardware choice.
+
+\subsection{Cost Concerns with Amazon Outposts}
+
+Amazon Outposts offer a managed on-premises cloud solution, but their subscription-based pricing, with the smallest configuration at about \$1,500 per month for a 3-year term \cite{aws_outposts_pricing}, can be a significant cost. This fixed cost structure may not suit innovative AI projects, especially those with unpredictable resource usage, as it lacks the flexibility to scale up and down easily.
+
+\subsubsection{Impact on Effective Innovation in AI}
+
+For effective innovation, especially in AI, internal projects often require flexibility to adapt to indeterminate resource requirements. The fixed monthly costs of Amazon Outposts, ranging from \$1,499 to \$14,999 \cite{aws_outposts_pricing}, represent a significant expense that may not be sustainable for organizations with variable usage, such as startups or imagineering research teams. Over a 3-year term, the total cost for the smallest configuration would be \$53,964, which could strain budgets and limit the ability to experiment and iterate, key aspects of innovation.
+
+Moreover, the lack of flexibility in scaling resources is a concern. Amazon Outposts require a commitment to a specific configuration for the term, and scaling up or down may involve additional costs or complexities, as custom configurations require contacting AWS \cite{aws_outposts_pricing}.
+
+\subsubsection{GPU Instance Availability and Costs}
+
+AI workloads, particularly for training and inference of large language models, often require GPU instances for efficiency. However, the standard configurations listed in the pricing pages primarily feature CPU-based instances, such as m5zn, c5zn, and r5zn, with no explicit mention of GPU instances \cite{aws_outposts_features}. While some sources, such as a 2024 article \cite{nvidia_aws}, suggest that Outposts support NVIDIA T4 Tensor Core GPUs, the pricing and availability are not well-defined.
+
+To illustrate, in the cloud, GPU instances like G4dn, powered by NVIDIA T4 GPUs, are available with on-demand pricing, such as \$0.526 per hour for g4dn.xlarge \cite{aws_g4_instances}, equating to approximately \$378 per month if run continuously. However, on Outposts, the equivalent would likely be bundled into the rack or server cost, which starts at \$1,499 per month for CPU-based configurations, suggesting that GPU-enabled setups could be significantly more expensive.
+
+\subsection{Retrieval Augmented Generation (RAG) Systems}
+RAG systems combine LLMs with external knowledge retrieval to improve response quality. Lewis et al. \cite{survey_evaluation_llms} discusses how RAG enhances factual accuracy by retrieving relevant documents before generation. This is particularly useful for domain-specific applications, where the LLM must rely on Disneyland Parks documentation.
+
+A practical guide by Patel \cite{building_rag_deepseek} outlines integrating RAG with DeepSeek models using tools like LangChain and Chroma, providing a blueprint I adapted for my implementation.
+
+\subsection{Mobile AI Applications and TTS}
+Integrating LLMs into mobile platforms is an active research area. Chen \cite{integrate_llm_ios} describes using API calls to connect iOS apps to remote LLMs, a method I adopt for my server-client architecture.
+
+For TTS, Brown \cite{tts_python} and the Piper TTS documentation \cite{piper_tts_python} detail implementing speech synthesis in Python.
+
+\section{Implementation}
+\label{sec:implementation}
+The implementation is comprised of four components: infrastructure setup, RAG system integration, iOS app development, and Python script with TTS.
+
+\subsection{On-Premises Infrastructure Setup}
+The foundation of my solution is a local server hosting the DeepSeek-R1-Distill-Qwen-32B model. This solution uses docker compose to manage containers, allowing scalability to Kubernetes, and supports either NVIDIA GPUs or Apple Silicon.
+
+The software environment was prepared as follows:
+\begin{itemize}
+    \item Python 3.10: Installed via \texttt{apt-get} as the base image.
+    \item PyTorch 1.10: verified with \texttt{torch.cuda.is\_available()}.
+    \item Hugging Face Transformers 4.20: Installed via \texttt{pip} to load and run the DeepSeek model.
+    \item FastAPI: Deployed as the API framework to expose the model to client applications.
+\end{itemize}
+
+The model was downloaded from the DeepSeek-R1 GitHub repository \cite{deepseek_r1_github} and loaded into memory using the Transformers library. I configured FastAPI to handle POST requests at the \texttt{/query} endpoint, where incoming queries are processed by the model and responses are returned in JSON format. This setup allows for client agnostic interfacing, supporting both the iOS app and Python TTTs script.
+
+\subsection{RAG System Integration}
+To augment the LLM with Disneyland Parks documentation, I implemented a RAG system with the following steps:
+\begin{enumerate}
+    \item \textbf{Preprocessing}: The documentation (PDFs and text files) was cleaned using Python’s \texttt{re} module to remove formatting artifacts (e.g., extra whitespace, HTML tags). It was then split into 512-token chunks using NLTK’s tokenizer.
+    \item \textbf{Embedding Generation}: I used the \texttt{all-MiniLM-L6-v2} sentence transformer model from the \texttt{sentence-transformers} library to generate 384-dimensional embeddings for each chunk.
+    \item \textbf{Vector Storage}: Embeddings were indexed in a Chroma vector database, configured with cosine similarity for retrieval.
+    \item \textbf{Integration with LLM}: The LangChain library facilitated RAG integration. I set the retriever to fetch the top 5 relevant chunks per query, which are concatenated with the user’s input in a custom prompt:
+    \begin{verbatim}
+    "Using the following context from Disneyland Parks documentation: {context}, 
+    answer the query: {query}"
+    \end{verbatim}
+    This prompt ensures the model leverages the Parks documentation.
+\end{enumerate}
+
+\subsection{iOS App Development}
+The iOS app provides a mobile interface for querying the AI system. Developed in Swift 5 using Xcode 14, it features:
+\begin{itemize}
+    \item \textbf{UI Design}: A minimalistic layout with a text field for query input, a submit button, and a scrollable text view for responses.
+    \item \textbf{Networking}: Alamofire 5.6 handles HTTP POST requests to the FastAPI server.
+    \item \textbf{Error Handling}: Alerts for network failures or invalid responses, with a retry option.
+    \item \textbf{Feedback}: A \texttt{UIActivityIndicatorView} spins during processing to indicate activity.
+\end{itemize}
+The app targets iOS 16+ and assumes a stable local network connection to the server.
+
+\subsection{Python Script with TTS}
+The Python script offers a command-line interface with TTS output, which could be used for integrated systems such as the robot walkers in the Parks. Key features include:
+\begin{itemize}
+    \item \textbf{Query Handling}: The \texttt{requests} library sends queries to the FastAPI server:
+    \begin{verbatim}
+    response = requests.post("http://server-ip:8000/query", json={"query": query})
+    answer = response.json()["answer"]
+    \end{verbatim}
+    \item \textbf{TTS Implementation}: The \texttt{pyttsx3} library converts responses to speech. Configuration:
+    \begin{verbatim}
+    engine = pyttsx3.init()
+    engine.setProperty("rate", 150)  # Speech speed
+    engine.setProperty("volume", 0.9)  # Volume level
+    engine.say(answer)
+    engine.runAndWait()
+    \end{verbatim}
+\end{itemize}
+
+\section{Evaluation}
+\label{sec:evaluation}
+I propose a multi-faceted evaluation to assess the system’s performance across four metrics: accuracy, response time, resource usage, and TTS quality. I compare the performance of the DeepSeek-R1-Distill-Qwen-32B model to the OrionStarAI/Orion-14B-Base model. Orion is model developed by AWS and should provide a practical comparison given its likelihood to be used in AIaaS applications.
+
+\subsection{Accuracy}
+A test set of 50 queries was created, spanning Disneyland Parks topics (e.g., "What are the FastPass rules?" "Where is Space Mountain located?"). Ground truth answers were extracted from the documentation. Responses are evaluated using:
+\begin{itemize}
+    \item \textbf{BLEU Score}: An automated metric for textual similarity.
+    \item \textbf{Human Assessment}: Three evaluators rate relevance and correctness on a 1-5 scale, targeting an average of 4+.
+\end{itemize}
+
+\subsection{Response Time}
+Latency is measured from query submission to response receipt, aiming for <2 seconds. Tools include Python’s \texttt{time} module for the script and Swift’s \texttt{Date} for the app. Tests simulate concurrent queries to assess performance under load.
+
+\subsection{Resource Usage}
+Server resources are monitored during testing with goals of under 80\% CPU and 16GB RAM usage.
+
+\subsection{TTS Quality}
+Five participants evaluate TTS output for 10 responses, rating naturalness and clarity (1-5 scale). I aim for an average score of 4+, indicating high-quality speech suitable for public use.
+
+\section{Outcomes}
+TODO: Add evaluation graph after system has been fully implemented!
+
+\section{Conclusions and Future Work}
+\label{sec:conclusions}
+This paper presents a cost-effective, on-premises AI solution using CoT Distilled LLMs, addressing the limitations of cloud-based AIaaS. By deploying the DeepSeek-R1 model locally and integrating a RAG system with Disneyland Parks documentation, I achieve accurate, secure, and efficient query handling. The iOS app and Python script with TTS showcase some practical applications.
+
+\subsection{Future work}
+\begin{itemize}
+    \item \textbf{Model Fine-Tuning}: Adapting the LLM to Disneyland-specific terminology for improved accuracy.
+    \item \textbf{Advanced RAG}: Implementing hybrid retrieval (e.g., BM25 + embeddings) for better context selection.
+    \item \textbf{Scalability}: Distributing the system across multiple nodes using Kubernetes or similar frameworks.
+\end{itemize}
+
+\newpage
+\singlespacing
+\bibliographystyle{IEEEtranN}
+\phantomsection
+\addcontentsline{toc}{section}{Bibliography} 
+\bibliography{references}
+
+\end{document}

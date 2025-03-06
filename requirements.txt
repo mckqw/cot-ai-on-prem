@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+pydantic
+transformers==4.20.0
+sentence-transformers
+chromadb
+langchain
+nltk
+requests
+pyttsx3
+psutil
+torch==1.12.0

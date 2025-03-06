@@ -1,0 +1,23 @@
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {section}{\numberline {2}Related Work}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Chain of Thought Distillation}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}On-Premises AI Solutions}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Cost Concerns with Amazon Outposts}{3}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {}Impact on Effective Innovation in AI}{3}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {}GPU Instance Availability and Costs}{3}{subsubsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.4}Retrieval Augmented Generation (RAG) Systems}{4}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Mobile AI Applications and TTS}{4}{subsection.2.5}%
+\contentsline {section}{\numberline {3}Implementation}{4}{section.3}%
+\contentsline {subsection}{\numberline {3.1}On-Premises Infrastructure Setup}{4}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}RAG System Integration}{5}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}iOS App Development}{6}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Python Script with TTS}{6}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Evaluation}{7}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Accuracy}{7}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Response Time}{7}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Resource Usage}{7}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}TTS Quality}{7}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Outcomes}{8}{section.5}%
+\contentsline {section}{\numberline {6}Conclusions and Future Work}{8}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Future work}{8}{subsection.6.1}%
+\contentsline {section}{Bibliography}{9}{section*.2}%
