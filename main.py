@@ -1,9 +1,7 @@
 import sys
 import os
 import re
-from nltk.tokenize import word_tokenize
-import nltk
-nltk.download('punkt')
+import spacy
 from sentence_transformers import SentenceTransformer
 import chromadb
 from fastapi import FastAPI
@@ -13,41 +11,90 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import HuggingFacePipeline
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain_core.output_parsers import StrOutputParser
+from langchain_community.document_loaders import BSHTMLLoader
+from langchain import hub
 import torch
 import requests
 import pyttsx3
 import logging
+import uvicorn
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+
+from data_links import *  
 
 # Set up logging for better debugging and device visibility
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Server utility functions
+nlp = spacy.load("en_core_web_sm")
+
 def clean_text(text):
-    """Clean text by removing extra whitespace and HTML tags."""
     text = re.sub(r'\s+', ' ', text)
     text = re.sub(r'<.*?>', '', text)
     return text.strip()
 
 def split_into_chunks(text, chunk_size=512):
-    """Split text into chunks of specified word size."""
-    words = word_tokenize(text)
+    doc = nlp(text)
+    words = [token.text for token in doc]
     chunks = [' '.join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
     return chunks
+
+def process_disneyland_data(links):
+    cleaned_text = ""
+    link_count = len(links)
+    all_chunks = []
+
+    chrome_options = Options()
+    # chrome_options.add_argument("--headless=new")
+
+    driver = webdriver.Chrome(options=chrome_options)
+    logger.info(f"Processing {link_count} disneyland help articles")
+    for link in links:
+        # Download the content
+        logger.info(f"Loading {link}")
+        # response = requests.get(link)
+        driver.get(link)
+        
+        # Wait for the page to load completely
+        wait = WebDriverWait(driver, 120)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.content .middle-section')))
+
+        # Write it to a file
+        logger.info(f"Write {link} to a file")
+
+        contentElement = driver.find_element(By.CSS_SELECTOR, 'div.content')
+
+        with open("data.html", "w", encoding="utf-8") as f:
+            content_to_write = contentElement.get_attribute("innerHTML")
+            f.write(content_to_write)
+        # Load it with an HTML parser
+        loader = BSHTMLLoader("data.html")
+        document = loader.load()[0]
+        # Clean up code
+        # Replace consecutive new lines with a single new line
+        raw_text = re.sub("\n\n+", "\n", document.page_content)
+        logger.info(f"\n\nData found {raw_text}\n\n")
+        cleaned_text += "\n" + clean_text(raw_text)
+        all_chunks += split_into_chunks(cleaned_text)
+    return all_chunks
 
 def run_server():
     """Start the FastAPI server with RAG and LLM."""
     # Get the model path from environment variable or use a default
-    model_path = os.getenv('MODEL_PATH', 'default/path/to/model')
-    logger.info(f"Loading model from: {model_path}")
+    model_name = os.getenv('MODEL_NAME', 'deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B')
+    # model_name = os.getenv('MODEL_NAME', 'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B')
+    # model_name = os.getenv('MODEL_NAME', 'meta-llama/Llama-3.1-8B-Instruct')
+    logger.info(f"Loading model: {model_name}")
 
     # Preprocess documents
     try:
-        with open("disneyland_doc.txt", "r") as f:
-            raw_text = f.read()
-        cleaned_text = clean_text(raw_text)
-        chunks = split_into_chunks(cleaned_text)
+        chunks = process_disneyland_data(data_links)
     except FileNotFoundError:
         logger.error("disneyland_doc.txt not found. Please ensure the file is in the correct directory.")
         sys.exit(1)
@@ -86,8 +133,8 @@ def run_server():
 
     # Load LLM model and move to the selected device
     try:
-        tokenizer = AutoTokenizer.from_pretrained(model_path)
-        model = AutoModelForCausalLM.from_pretrained(model_path)
+        tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True, load_in_8bit=False)
+        model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True, load_in_8bit=False)
         model.to(device)  # Move model to the selected device
         model.eval()
         logger.info(f"Model loaded successfully on {device}")
@@ -111,7 +158,7 @@ def run_server():
             model=model,
             tokenizer=tokenizer,
             device=0 if device.type == "cuda" else -1,  # Use GPU if CUDA, else CPU
-            max_new_tokens=200
+            max_new_tokens=10000
         )
         llm = HuggingFacePipeline(pipeline=pipe)
     except Exception as e:
@@ -119,9 +166,9 @@ def run_server():
         sys.exit(1)
 
     # Define prompt template
-    template = """Using the following context from Disneyland Parks documentation: {context}, answer the query: {query}"""
+    template = """Using the following context from Disneyland Parks documentation: {context}, answering the query: {query}"""
     prompt = PromptTemplate(template=template, input_variables=["context", "query"])
-    chain = LLMChain(llm=llm, prompt=prompt)
+    chain = prompt | llm | StrOutputParser()
 
     # Define FastAPI app
     app = FastAPI()
@@ -132,30 +179,29 @@ def run_server():
     @app.post("/query")
     def query_model(query: Query):
         try:
+            logger.info(f"Processing request for {query.text}")
             docs = retriever.get_relevant_documents(query.text)
             context = " ".join([doc.page_content for doc in docs])
-            # Move inputs to the selected device
-            inputs = tokenizer(query.text, return_tensors="pt").to(device)
-            # Generate response using the model on the selected device
-            with torch.no_grad():
-                outputs = model.generate(**inputs, max_length=200)
-            response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-            return {"answer": response}
+            logger.info(f"Processing request with this context: {context}")
+            response = chain.invoke({"query": query.text, "context": context})
+            # response = llm.invoke(messages)
+            answer = response.split("</think>")[-1] # Split thinking and get only the answer
+            return {"answer": response, "final": answer}
         except Exception as e:
             logger.error(f"Error processing query: {e}")
             return {"answer": "An error occurred while processing your query."}
 
     # Start the server
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=80)
 
 # TTS client functions
 def query_server(query):
+    server_path = os.getenv('SERVER_URL', 'http://0.0.0.0/query')
     """Send query to the FastAPI server and return the response."""
     try:
-        response = requests.post("http://localhost:8000/query", json={"text": query}, timeout=10)
+        response = requests.post(server_path, json={"text": query}, timeout=1000)
         response.raise_for_status()
-        return response.json()["answer"]
+        return response.json()["final"]
     except requests.RequestException as e:
         return f"Error: Unable to get response from server ({str(e)})"
 
@@ -179,7 +225,7 @@ def run_tts_client():
             break
         answer = query_server(user_input)
         print("Answer:", answer)
-        speak_text(answer)
+        speak_text(answer) # TODO: Look into custom ai tts
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -5,11 +5,13 @@ services:
     build: .
     # runtime: nvidia  # Remove this line if not using an NVIDIA GPU
     ports:
-      - "8000:8000"
+      - "8000:80"
     volumes:
-      - /Users/matthew.h.clark/.cache/huggingface/hub/:/models  # Update with the actual path to your model files
+      - $PWD:/app:delegated
+      - /Users/matthew.h.clark/.cache/huggingface/hub/:/models
     environment:
-      - MODEL_PATH=/Users/matthew.h.clark/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-R1-Distill-Qwen-32B
+      - MODEL_NAME=deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
+      - MODEL_PATH=/models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
     command: python main.py server
 
   client:
@@ -17,7 +19,7 @@ services:
     stdin_open: true
     tty: true
     environment:
-      - SERVER_URL=http://server:8000/query
+      - SERVER_URL=http://server:8008/query
     command: python main.py tts
     depends_on:
       - server

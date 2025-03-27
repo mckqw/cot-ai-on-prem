@@ -1,0 +1,11 @@
+{
+    "results": [],
+    "summary": {
+        "avg_bleu": 0,
+        "avg_accuracy": 0,
+        "avg_response_time": 0,
+        "avg_cpu": 0.0,
+        "max_memory": 16.971939086914062,
+        "avg_tts_rating": 0
+    }
+}

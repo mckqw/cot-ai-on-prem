@@ -16,12 +16,12 @@ test_data = [
 ]
 
 # Server URL (adjust as needed if the server runs on a different address/port)
-server_url = "http://localhost:8000/query"
+server_url = "http://0.0.0.0/query"
 
 def send_query(query):
     """Send a query to the server and return the response."""
     try:
-        response = requests.post(server_url, json={"text": query}, timeout=10)
+        response = requests.post(server_url, json={"text": query}, timeout=1000)
         response.raise_for_status()
         return response.json()["answer"]
     except requests.RequestException as e:
@@ -144,7 +144,7 @@ def main():
     # Calculate resource usage metrics
     cpu_avg = sum(resource_data["cpu"]) / len(resource_data["cpu"]) if resource_data["cpu"] else 0
     memory_max = max(resource_data["memory"]) if resource_data["memory"] else 0
-    gpu_vram_max = max(resource_data["gpu_vram"]) if resource_data["gpu_vram"] else 0
+    # gpu_vram_max = max(resource_data["gpu_vram"]) if resource_data["gpu_vram"] else 0
 
     # Accuracy assessment: collect human ratings
     print("\nStarting accuracy assessment...")
@@ -180,7 +180,7 @@ def main():
     print(f"Average response time: {avg_response_time:.2f} seconds")
     print(f"Average CPU usage: {cpu_avg:.2f}%")
     print(f"Max memory usage: {memory_max:.2f} GB")
-    print(f"Max GPU VRAM usage: {gpu_vram_max:.2f} GB" if gpu_vram_max else "Max GPU VRAM usage: N/A")
+    # print(f"Max GPU VRAM usage: {gpu_vram_max:.2f} GB" if gpu_vram_max else "Max GPU VRAM usage: N/A")
     print(f"Average TTS quality rating: {avg_tts_rating:.2f}")
 
     # Save detailed results to a JSON file
@@ -193,7 +193,7 @@ def main():
                 "avg_response_time": avg_response_time,
                 "avg_cpu": cpu_avg,
                 "max_memory": memory_max,
-                "max_gpu_vram": gpu_vram_max,
+                # "max_gpu_vram": gpu_vram_max,
                 "avg_tts_rating": avg_tts_rating
             }
         }, f, indent=4)
